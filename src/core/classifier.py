@@ -12,7 +12,16 @@ class TopicClassifier:
         try:
             with open(path) as f:
                 data = json.load(f)
-            self.categories = data
+            # Handle both flat and nested category structures
+            if any(isinstance(v, dict) for v in data.values()):
+                # Nested: {domain: {topic: [keywords]}}
+                flat = {}
+                for domain, topics in data.items():
+                    for topic, keywords in topics.items():
+                        flat[topic] = keywords
+                self.categories = flat
+            else:
+                self.categories = data
         except FileNotFoundError:
             print("Warning: categories.json not found, using defaults.")
             self.categories = self._get_defaults()
@@ -31,22 +40,42 @@ class TopicClassifier:
         selected_topics: list of topic keys
         returns: float (0.0 to 1.0)
         """
-        text = (paper.get("title", "") + " " + 
-                " ".join(paper.get("abstract_inverted_index", []))).lower()
+        # Handle abstract: OpenAlex uses inverted_index (dict) or list
+        abstract = paper.get("abstract_inverted_index", {})
+        if isinstance(abstract, dict):
+            text = " ".join(abstract.keys())
+        elif isinstance(abstract, list):
+            text = " ".join(str(x) for x in abstract)
+        else:
+            text = str(abstract)
+        
+        full_text = (paper.get("title", "") + " " + text).lower()
         
         total_relevance = 0
-        total_words = len(text.split())
+        total_words = len(full_text.split())
         if total_words == 0:
             return 0.0
         
+        matched_keywords = 0
         for topic in selected_topics:
             keywords = self.categories.get(topic, [topic])
             for kw in keywords:
-                count = len(re.findall(rf'\b{re.escape(kw)}\b', text))
-                total_relevance += count
+                import re
+                count = len(re.findall(rf'\b{re.escape(kw)}\b', full_text))
+                if count > 0:
+                    matched_keywords += 1
+                total_relevance += count * 2  # Each keyword match counts double
         
-        # Normalize by number of selected topics and length
-        return min(1.0, total_relevance / max(1, len(selected_topics) * 5))
+        # Bonus for keyword in title (strong signal)
+        title_lower = paper.get("title", "").lower()
+        for topic in selected_topics:
+            for kw in self.categories.get(topic, []):
+                if kw.lower() in title_lower:
+                    total_relevance += 5
+        
+        # Score based on unique matched keywords and total word count
+        unique_factor = matched_keywords / max(1, len(selected_topics))
+        return min(1.0, (total_relevance + unique_factor) / max(1, len(selected_topics) * 2))
 
 if __name__ == "__main__":
     c = TopicClassifier()

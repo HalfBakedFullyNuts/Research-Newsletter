@@ -10,35 +10,30 @@ class OpenAlexClient:
         self.base_url = "https://api.openalex.org"
         self.delay = OPENALEX_DELAY
 
-    def search_works(self, query, from_date=None, to_date=None, select=None, limit=20):
-        params = {
-            "search": query,
-            "filter": f"type:article",
-            "sort": "cited_by_count:desc",
-            "per_page": limit,
-            "select": "doi,title,abstract_inverted_index,publication_date,cited_by_count,referenced_works,locations,authorships,primary_location"
-        }
+    def search_works(self, query, from_date=None, to_date=None, limit=20):
+        filters = ["type:article"]
         if from_date:
-            params["filter"] += f",from_publication_date:{from_date}"
+            filters.append(f"from_publication_date:{from_date}")
         if to_date:
-            params["filter"] += f",to_publication_date:{to_date}"
-
-        query_string = "&".join(f"{k}={v}" for k, v in params.items())
-        url = f"{self.base_url}/works?{query_string}"
-
-        import urllib.parse
-        url = f"{self.base_url}/works?search={urllib.parse.quote(query)}&filter=type:article&sort=cited_by_count:desc&per_page={limit}&select=doi,title,abstract_inverted_index,publication_date,cited_by_count,authorships,primary_location"
-        if from_date:
-            url += f"&filter=from_publication_date:{from_date}"
-
+            filters.append(f"to_publication_date:{to_date}")
+        
+        url = (
+            f"{self.base_url}/works?"
+            f"search={urllib.parse.quote(query)}&"
+            f"filter={','.join(filters)}&"
+            f"sort=relevance_score:desc&"
+            f"per_page={limit}&"
+            f"select=doi,title,abstract_inverted_index,publication_date,cited_by_count,authorships,primary_location"
+        )
+        
         req = urllib.request.Request(url)
         with urllib.request.urlopen(req) as response:
             data = json.loads(response.read().decode())
-
+        
         return data.get("results", [])
 
 if __name__ == "__main__":
     client = OpenAlexClient()
-    results = client.search_works("ADHS psychotherapie", limit=3)
+    results = client.search_works("ADHD attention deficit", from_date="2026-07-01", limit=3)
     for r in results:
         print(f"Title: {r['title']}\nDate: {r['publication_date']}\nCitations: {r['cited_by_count']}\n---")
