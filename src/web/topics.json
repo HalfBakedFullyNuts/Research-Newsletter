@@ -1,0 +1,252 @@
+{
+  "sales": {
+    "label": "Sales",
+    "topics": {
+      "persuasion_psychology": {
+        "label": "Persuasion & Influence",
+        "keywords": ["persuasion", "influence", "compliance", "obedience", "social influence", "compliance gaining"]
+      },
+      "decision_making": {
+        "label": "Decision Making & Biases",
+        "keywords": ["decision making", "choice architecture", "bounded rationality", "prospect theory"]
+      },
+      "negotiation": {
+        "label": "Negotiation Strategies",
+        "keywords": ["negotiation", "bargaining", "conflict resolution", "game theory"]
+      },
+      "trust_building": {
+        "label": "Trust & Credibility",
+        "keywords": ["trust", "credibility", "source credibility", "persuasion knowledge"]
+      },
+      "consumer_behavior": {
+        "label": "Consumer Psychology",
+        "keywords": ["consumer psychology", "purchase intention", "consumer behavior"]
+      }
+    }
+  },
+  "marketing": {
+    "label": "Marketing",
+    "topics": {
+      "consumer_behavior": {
+        "label": "Consumer Behavior",
+        "keywords": ["consumer behavior", "consumer psychology", "purchase decision", "brand attitude"]
+      },
+      "neuromarketing": {
+        "label": "Neuromarketing",
+        "keywords": ["neuromarketing", "neuroscience", "brain imaging", "electroencephalography"]
+      },
+      "brand_psychology": {
+        "label": "Brand Psychology",
+        "keywords": ["brand loyalty", "brand attachment", "brand personality", "brand community"]
+      },
+      "digital_marketing": {
+        "label": "Digital & Social Media",
+        "keywords": ["social media marketing", "digital advertising", "online engagement", "content marketing"]
+      },
+      "pricing_psychology": {
+        "label": "Pricing Psychology",
+        "keywords": ["price perception", "price fairness", "price framing", "willingness to pay"]
+      }
+    }
+  },
+  "product": {
+    "label": "Product Management",
+    "topics": {
+      "innovation_diffusion": {
+        "label": "Innovation Adoption",
+        "keywords": ["technology acceptance", "diffusion of innovation", "innovation adoption", "technology readiness"]
+      },
+      "user_experience": {
+        "label": "User Experience & Design",
+        "keywords": ["user experience", "usability", "user satisfaction", "human computer interaction"]
+      },
+      "agile_development": {
+        "label": "Agile & Productivity",
+        "keywords": ["agile development", "scrum", "software project management", "sprint performance"]
+      },
+      "product_life_cycle": {
+        "label": "Product Lifecycle",
+        "keywords": ["product lifecycle", "product success", "new product development", "product management"]
+      },
+      "customer_development": {
+        "label": "Customer-Centric Design",
+        "keywords": ["customer development", "lean startup", "design thinking", "user research"]
+      }
+    }
+  },
+  "design": {
+    "label": "Design",
+    "topics": {
+      "visual_perception": {
+        "label": "Visual Perception & Aesthetics",
+        "keywords": ["visual perception", "aesthetic judgment", "visual processing", "design aesthetics"]
+      },
+      "interaction_design": {
+        "label": "Interaction Design",
+        "keywords": ["interaction design", "user interface", "affordance", "perceived usability"]
+      },
+      "cognitive_workload": {
+        "label": "Cognitive Load & Mental Models",
+        "keywords": ["cognitive load", "mental model", "task performance", "working memory"]
+      },
+      "design_thinking": {
+        "label": "Design Thinking",
+        "keywords": ["design thinking", "creative problem solving", "divergent thinking", "innovation"]
+      },
+      "accessibility": {
+        "label": "Inclusive Design",
+        "keywords": ["accessibility", "inclusive design", "universal design", "human factors"]
+      }
+    }
+  },
+  "hr": {
+    "label": "Human Resources",
+    "topics": {
+      "organizational_psychology": {
+        "label": "Organizational Psychology",
+        "keywords": ["organizational behavior", "workplace psychology", "employee well-being", "job satisfaction"]
+      },
+      "talent_acquisition": {
+        "label": "Talent Acquisition & Selection",
+        "keywords": ["recruitment", "employee selection", "hiring", "personality assessment"]
+      },
+      "leadership_development": {
+        "label": "Leadership & Management",
+        "keywords": ["leadership", "management style", "transformational leadership", "team leadership"]
+      },
+      "performance_management": {
+        "label": "Performance & Motivation",
+        "keywords": ["performance management", "employee motivation", "goal setting", "incentive"]
+      },
+      "diversity_equity": {
+        "label": "Diversity & Inclusion",
+        "keywords": ["workplace diversity", "inclusion", "gender equality", "implicit bias"]
+      }
+    }
+  },
+  "management": {
+    "label": "Management",
+    "topics": {
+      "strategic_management": {
+        "label": "Strategy & Competitive Advantage",
+        "keywords": ["strategic management", "competitive advantage", "strategic decision", "resource based view"]
+      },
+      "change_management": {
+        "label": "Change Management",
+        "keywords": ["organizational change", "change management", "transformation", "resistance to change"]
+      },
+      "knowledge_management": {
+        "label": "Knowledge Management",
+        "keywords": ["knowledge management", "organizational learning", "knowledge sharing", "tacit knowledge"]
+      },
+      "project_management": {
+        "label": "Project Management",
+        "keywords": ["project management", "project success", "project governance", "project risk"]
+      },
+      "stakeholder_management": {
+        "label": "Stakeholder Relations",
+        "keywords": ["stakeholder engagement", "corporate governance", "stakeholder theory"]
+      }
+    }
+  },
+  "fuehrung": {
+    "label": "Führung",
+    "topics": {
+      "servant_leadership": {
+        "label": "Servant & Authentic Leadership",
+        "keywords": ["servant leadership", "authentic leadership", "ethical leadership", "leader integrity"]
+      },
+      "psychological_safety": {
+        "label": "Psychological Safety & Trust",
+        "keywords": ["psychological safety", "leader-member exchange", "trust in leadership", "voice behavior"]
+      },
+      "employee_engagement": {
+        "label": "Employee Engagement & Culture",
+        "keywords": ["employee engagement", "organizational culture", "workplace well-being", "job crafting"]
+      },
+      "conflict_resolution": {
+        "label": "Conflict Management",
+        "keywords": ["workplace conflict", "conflict resolution", "interpersonal conflict", "team conflict"]
+      },
+      "feedback_coaching": {
+        "label": "Feedback & Coaching",
+        "keywords": ["feedback intervention", "coaching", "developmental feedback", "learning orientation"]
+      }
+    }
+  },
+  "development": {
+    "label": "Software Development",
+    "topics": {
+      "software_engineering": {
+        "label": "Software Engineering Practices",
+        "keywords": ["software engineering", "code quality", "technical debt", "software maintenance"]
+      },
+      "devops_agile": {
+        "label": "DevOps & Agile",
+        "keywords": ["devops", "continuous integration", "continuous delivery", "agile methodology"]
+      },
+      "code_reviews": {
+        "label": "Code Review & Quality Assurance",
+        "keywords": ["code review", "software inspection", "defect detection", "peer review"]
+      },
+      "software_architecture": {
+        "label": "Software Architecture",
+        "keywords": ["software architecture", "architectural patterns", "design patterns", "system design"]
+      },
+      "ai_mlops": {
+        "label": "AI & MLOps",
+        "keywords": ["machine learning", "mlops", "model deployment", "deep learning", "neural network"]
+      }
+    }
+  },
+  "customer_success": {
+    "label": "Customer Success",
+    "topics": {
+      "customer_retention": {
+        "label": "Customer Retention & Churn",
+        "keywords": ["customer retention", "churn prediction", "customer lifecycle", "subscription renewal"]
+      },
+      "customer_satisfaction": {
+        "label": "Customer Satisfaction & NPS",
+        "keywords": ["customer satisfaction", "net promoter score", "customer experience", "service quality"]
+      },
+      "product_market_fit": {
+        "label": "Product-Market Fit",
+        "keywords": ["product market fit", "customer needs", "value proposition", "customer discovery"]
+      },
+      "customer_onboarding": {
+        "label": "Customer Onboarding & Adoption",
+        "keywords": ["customer onboarding", "user adoption", "activation", "time to value"]
+      },
+      "account_management": {
+        "label": "Account Management & Upsell",
+        "keywords": ["account management", "upsell", "cross-sell", "customer lifetime value", "expansion revenue"]
+      }
+    }
+  },
+  "customer_service": {
+    "label": "Customer Service",
+    "topics": {
+      "service_recovery": {
+        "label": "Service Recovery & Complaint Handling",
+        "keywords": ["service recovery", "complaint handling", "service failure", "customer forgiveness"]
+      },
+      "communication_strategies": {
+        "label": "Communication Strategies",
+        "keywords": ["communication effectiveness", "service communication", "customer interaction", "communication strategy"]
+      },
+      "empathy_customer": {
+        "label": "Empathy & Emotional Intelligence",
+        "keywords": ["empathy", "emotional intelligence", "affective labor", "customer interaction"]
+      },
+      "ai_chatbots": {
+        "label": "AI & Chatbots",
+        "keywords": ["chatbot", "artificial intelligence", "customer service automation", "conversational agent"]
+      },
+      "quality_service": {
+        "label": "Service Quality & Excellence",
+        "keywords": ["service quality", "service excellence", "service blueprint", "SERVQUAL"]
+      }
+    }
+  }
+}
