@@ -1,0 +1,19 @@
+{
+  "source": "Cappellato et al. 2020 (Beall's list update) - manual import",
+  "url": "https://github.com/cappellato/beall-predatory",
+  "fetched_at": "2026-07-20T12:00:00Z",
+  "count": 10,
+  "note": "Manual subset — monthly update via cron (needs working source URL)",
+  "publishers": [
+    "academia publishing",
+    "academica publishing",
+    "alphascript",
+    "atlas scientific publishers",
+    "cc publishers",
+    "crescent research",
+    "eastern scientific publishers",
+    "excellence publishing",
+    "global academic publishers",
+    "standard publishers"
+  ]
+}

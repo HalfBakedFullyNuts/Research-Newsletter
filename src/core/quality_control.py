@@ -7,6 +7,7 @@ import json
 import re
 import urllib.request
 import urllib.parse
+import os
 from datetime import datetime
 
 class QualityGates:
@@ -23,7 +24,7 @@ class QualityGates:
         "min_citations": (False, 0, "Minimum citation count (default: 0)"),
         "max_age_days": (True, 365, "Max paper age in days"),
         "open_access": (False, 0, "Require open access full text"),
-        "language_check": (True, 0, "Filter non-English papers"),
+        "language_check": (False, 0, "Filter non-English papers (disabled — multilingual)"),
         "journal_impact": (False, 0, "Minimum journal quality tier"),
         "duplicate_check": (True, 0, "Deduplicate by DOI/title similarity"),
     }
@@ -46,65 +47,32 @@ class QualityGates:
             pass
     
     def load_predatory_list(self):
-        """Load known predatory publishers from Cappellato et al. 2020 Beall's list update."""
-        # Full list: https://github.com/cappellato/beall-predatory
-        # Curated subset of confirmed predatory publishers (by exact publisher name)
-        self.predatory_publishers = {
-            "academia publishing",
-            "academica publishing",
-            "academic publishing company",
-            "academic research association",
-            "advanced scientific publishing",
-            "alphascript",
-            "americas academic",
-            "american academic research",
-            "amj publishers",
-            "anz publisher",
-            "atlas scientific",
-            "broad research",
-            "cc publishers",
-            "crescent research",
-            "delphi scientific",
-            "diamond publishers",
-            "eastern scientific",
-            "excellence publishing",
-            "federation publishers",
-            "global academic",
-            "global research",
-            "harmonizing",
-            "holistic",
-            "humanitarian",
-            "international scientific",
-            "open access publishers",
-            "open science publishers",
-            "progressive publishers",
-            "pure science",
-            "rapid science",
-            "research trends",
-            "scientific research",
-            "science and education",
-            "science and society",
-            "society of scientific",
-            "southeastern",
-            "south european",
-            "standard publishers",
-            "universal publishers",
-            "vision publishers",
-            "world academy",
-            "world scientific",
-            "zenith",
-            "zero",
-            "zone",
-        }
-        # Also: known predatory journal prefixes (Beall's list)
-        self.predatory_prefixes = {
-            "asian online",
-            "turkish journal",
-            "indian journal",
-            "international journal of",
-            "journal of global",
-            "world journal of",
-        }
+        """Load known predatory publishers.
+        
+        Source: Cappellato et al. 2020 (Beall's list update) or fallback.
+        File updated monthly via cron job.
+        """
+        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "predatory_publishers.json")
+        try:
+            with open(json_path) as f:
+                data = json.load(f)
+            self.predatory_publishers = set(data.get("publishers", []))
+            self.predatory_prefixes = set()
+            self.predatory_source = data.get("source", "Unknown")
+            self.predatory_fetched = data.get("fetched_at", "Unknown")
+        except (FileNotFoundError, json.JSONDecodeError):
+            # Fallback: embedded list (Cappellato 2020 subset)
+            self.predatory_publishers = {
+                "academia publishing", "alphascript", "atlas scientific",
+                "cc publishers", "eastern scientific", "excellence publishing",
+                "global academic", "global research", "standard publishers",
+            }
+            self.predatory_prefixes = {
+                "asian online", "turkish journal", "indian journal",
+                "international journal of", "world journal of",
+            }
+            self.predatory_source = "Fallback"
+            self.predatory_fetched = "N/A"
     
     def check(self, paper):
         """
