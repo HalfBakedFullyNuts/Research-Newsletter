@@ -175,21 +175,39 @@ class QualityGates:
     # ── Individual Gate Implementations ──
     
     def retraction_check(self, doi):
-        """Check if a paper has been retracted via Crossref API."""
+        """Check if a paper has been retracted via Crossref API.
+        
+        Uses the `updated-by` field — the authoritative Crossref indicator.
+        A retraction is flagged when any entry in `updated-by` has `"type": "retraction"`.
+        Falls back gracefully on API errors (passes the paper).
+        """
+        if not doi:
+            return True, "No DOI", 0.5
+        
         try:
-            url = f"https://api.crossref.org/works/{urllib.parse.quote(doi)}"
+            url = f"https://api.crossref.org/works?filter=doi:{urllib.parse.quote(doi)}&select=DOI,title,updated-by"
             req = urllib.request.Request(url, headers={"User-Agent": "ResearchPulse/1.0"})
             with urllib.request.urlopen(req, timeout=5) as resp:
                 data = json.loads(resp.read().decode())
             
-            is_retracted = data.get("message", {}).get("is-retracted", False)
+            items = data.get("message", {}).get("items", [])
+            if not items:
+                return True, "Not found in Crossref", 0.5
             
-            if is_retracted:
-                return False, "Retracted", 0.0
+            paper = items[0]
+            updated_by = paper.get("updated-by", [])
+            
+            for entry in updated_by:
+                if entry.get("type") == "retraction":
+                    source = entry.get("source", "unknown")
+                    date = entry.get("updated", {}).get("date-parts", [["?"]])
+                    date_str = f"{date[0][0]}-{date[0][1]:02d}-{date[0][2]:02d}" if len(date[0]) == 3 else "?"
+                    return False, f"Retracted ({source}, {date_str})", 0.0
+            
             return True, "Not retracted", 1.0
         except Exception as e:
             # If we can't verify, pass (better than false negatives)
-            return True, f"Verification failed: {str(e)[:50]}", 0.5
+            return True, f"Check failed: {str(e)[:40]}", 0.5
     
     def predatory_journal_check(self, paper):
         """Check if the publisher/journal is known predatory."""
