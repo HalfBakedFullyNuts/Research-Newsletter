@@ -1,0 +1,61 @@
+{
+  "Psychology & Psychiatry": {
+    "adhs": [
+      "ADHD",
+      "Attention deficit",
+      "Hyperactivity",
+      "Impulsivity",
+      "executive function"
+    ],
+    "trauma_psychology": [
+      "PTSD",
+      "Complex trauma",
+      "Childhood maltreatment",
+      "Trauma therapy",
+      "EMDR"
+    ],
+    "clinical_psychology": [
+      "Anxiety disorders",
+      "Depression",
+      "CBT",
+      "Psychodynamic",
+      "Schematherapy"
+    ],
+    "palliative_psychology": [
+      "End of life",
+      "Palliative care",
+      "Bereavement",
+      "Terminal illness",
+      "Grief"
+    ]
+  },
+  "Healthcare & AI": {
+    "clinical_ai": [
+      "Machine learning",
+      "Deep learning",
+      "Clinical decision support",
+      "Predictive modeling",
+      "Natural language processing"
+    ],
+    "digital_health": [
+      "Telehealth",
+      "Wearables",
+      "Electronic health records",
+      "mHealth"
+    ]
+  },
+  "Management & Economics": {
+    "behavioral_economics": [
+      "Nudge theory",
+      "Loss aversion",
+      "Prospect theory",
+      "Mental accounting"
+    ],
+    "organizational_psychology": [
+      "Employee engagement",
+      "Remote work",
+      "Leadership",
+      "Change management"
+    ]
+  }
+}
