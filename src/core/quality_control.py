@@ -21,7 +21,7 @@ class QualityGates:
         # Gate name: (enabled, min_score, description)
         "retraction_check": (True, 1.0, "Filter retracted papers"),
         "predatory_journal": (True, 1.0, "Filter predatory journals"),
-        "min_citations": (False, 0, "Minimum citation count (default: 0)"),
+        "min_citations": (True, 10, "Minimum citation count (filters low-quality)"),
         "max_age_days": (True, 365, "Max paper age in days"),
         "open_access": (False, 0, "Require open access full text"),
         "language_check": (False, 0, "Filter non-English papers (disabled — multilingual)"),
@@ -260,9 +260,24 @@ class QualityGates:
         return False, "No open access", 0.0
     
     def min_citations_check(self, paper):
-        """Check minimum citation count."""
+        """Check minimum citation count.
+        
+        Circuit breaker: papers <30 days old bypass the citation gate.
+        """
         citations = paper.get("cited_by_count", 0)
         min_count = self.config["min_citations"][1]
+        
+        # Circuit breaker: new papers (<30 days) bypass citation check
+        pub_date = paper.get("publication_date", "")
+        if pub_date:
+            try:
+                pub = datetime.fromisoformat(pub_date[:10])
+                age_days = (datetime.now() - pub).days
+                if age_days < 30:
+                    return True, f"New ({age_days}d), bypass", 1.0
+            except:
+                pass
+        
         if citations < min_count:
             return False, f"Low citations: {citations}", 0.0
         return True, f"Citations: {citations}", 1.0
