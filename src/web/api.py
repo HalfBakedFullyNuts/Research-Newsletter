@@ -13,8 +13,13 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, EmailStr, field_validator
 from typing import List, Optional
+import re
+import time
+from collections import defaultdict
+import threading
 
 # Load topics
 TOPICS_PATH = Path(__file__).parent / "topics.json"
@@ -29,6 +34,48 @@ app = FastAPI(title="ResearchPulse Backend", version="0.1.0")
 templates = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
 app.mount("/static", StaticFiles(directory=str(Path(__file__).parent / "static")), name="static")
 
+# CORS - restrict to same origin
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Rate limiting: simple in-memory rate limiter
+class RateLimiter:
+    def __init__(self):
+        self.requests = defaultdict(list)
+        self.lock = threading.Lock()
+    
+    def is_allowed(self, key: str, max_requests: int = 10, window: int = 60) -> bool:
+        now = time.time()
+        with self.lock:
+            # Clean old requests
+            self.requests[key] = [t for t in self.requests[key] if now - t < window]
+            if len(self.requests[key]) >= max_requests:
+                return False
+            self.requests[key].append(now)
+            return True
+
+rate_limiter = RateLimiter()
+
+# Rate limit middleware
+@app.middleware("http")
+async def rate_limit_middleware(request: Request, call_next):
+    # Only rate limit API endpoints
+    if request.url.path.startswith("/api/"):
+        client_ip = request.client.host if request.client else "unknown"
+        key = f"{request.url.path}:{client_ip}"
+        if not rate_limiter.is_allowed(key, max_requests=20, window=60):
+            return JSONResponse(
+                status_code=429,
+                content={"error": "Too many requests. Try again later."}
+            )
+    response = await call_next(request)
+    return response
+
 # Init DB on startup
 @app.on_event("startup")
 def startup():
@@ -36,18 +83,86 @@ def startup():
 
 
 # ── Pydantic Models ──
+
+# Input validation constants
+VALID_DAYS = {"monday", "wednesday", "friday"}
+VALID_TIMES = {"morning", "midday"}
+VALID_PROFESIONS = set(TOPICS.keys())
+
+EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+
 class SignupRequest(BaseModel):
     email: str
-    profession: str  # sales, marketing, product, design, hr, etc.
-    topics: List[str]  # topic keys within the profession
-    day: str  # monday, wednesday, friday
-    time: str  # morning, midday
+    profession: str
+    topics: List[str]
+    day: str
+    time: str
+    
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, v):
+        if not EMAIL_REGEX.match(v):
+            raise ValueError("Invalid email format")
+        if len(v) > 254:
+            raise ValueError("Email too long")
+        return v.lower()
+    
+    @field_validator("profession")
+    @classmethod
+    def validate_profession(cls, v):
+        if v not in VALID_PROFESIONS:
+            raise ValueError(f"Invalid profession. Choose from: {', '.join(sorted(VALID_PROFESIONS))}")
+        return v
+    
+    @field_validator("topics")
+    @classmethod
+    def validate_topics(cls, v):
+        if len(v) > 3:
+            raise ValueError("Maximum 3 topics")
+        if len(v) < 1:
+            raise ValueError("At least 1 topic required")
+        return v
+    
+    @field_validator("day")
+    @classmethod
+    def validate_day(cls, v):
+        if v not in VALID_DAYS:
+            raise ValueError(f"Invalid day. Choose from: {', '.join(sorted(VALID_DAYS))}")
+        return v
+    
+    @field_validator("time")
+    @classmethod
+    def validate_time(cls, v):
+        if v not in VALID_TIMES:
+            raise ValueError(f"Invalid time. Choose from: {', '.join(sorted(VALID_TIMES))}")
+        return v
 
 
 class FeedbackRequest(BaseModel):
     email: str
     message: str
-    rating: Optional[int] = None  # 1-5
+    rating: Optional[int] = None
+    
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, v):
+        if not EMAIL_REGEX.match(v):
+            raise ValueError("Invalid email format")
+        return v.lower()
+    
+    @field_validator("message")
+    @classmethod
+    def validate_message(cls, v):
+        if len(v) > 2000:
+            raise ValueError("Message too long (max 2000 chars)")
+        return v
+    
+    @field_validator("rating")
+    @classmethod
+    def validate_rating(cls, v):
+        if v is not None and (v < 1 or v > 5):
+            raise ValueError("Rating must be 1-5")
+        return v
 
 
 class SettingsUpdate(BaseModel):
@@ -56,6 +171,27 @@ class SettingsUpdate(BaseModel):
     day: Optional[str] = None
     time: Optional[str] = None
     unsubscribe: Optional[bool] = False
+    
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, v):
+        if not EMAIL_REGEX.match(v):
+            raise ValueError("Invalid email format")
+        return v.lower()
+    
+    @field_validator("day")
+    @classmethod
+    def validate_day(cls, v):
+        if v is not None and v not in VALID_DAYS:
+            raise ValueError(f"Invalid day. Choose from: {', '.join(sorted(VALID_DAYS))}")
+        return v
+    
+    @field_validator("time")
+    @classmethod
+    def validate_time(cls, v):
+        if v is not None and v not in VALID_TIMES:
+            raise ValueError(f"Invalid time. Choose from: {', '.join(sorted(VALID_TIMES))}")
+        return v
 
 
 # ── Pages ──

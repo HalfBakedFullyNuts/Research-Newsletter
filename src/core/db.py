@@ -64,11 +64,17 @@ def get_active_subscribers():
         "time": s["time"]
     } for s in subs]
 
+# Whitelist allowed columns to prevent SQL injection via column names
+ALLOWED_COLUMNS = {"topics", "profession", "day", "time", "active"}
+
 def update_subscriber(email, updates):
     conn = get_db()
     fields = []
     values = []
     for key, value in updates.items():
+        # CRITICAL: Reject any column not in whitelist
+        if key not in ALLOWED_COLUMNS:
+            raise ValueError(f"Column '{key}' not allowed for updates")
         if key == "topics":
             value = json.dumps(value)
         fields.append(f"{key}=?")
