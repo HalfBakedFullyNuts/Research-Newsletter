@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Research Newsletter — Full Pipeline
+ResearchPulse — Full Pipeline
 Fetches papers for all active subscriber topics, generates digests, and sends emails.
 """
 import sys
@@ -16,6 +16,7 @@ from src.core.openalex import OpenAlexClient
 from src.core.classifier import TopicClassifier
 from src.core.db import init_db, get_active_subscribers, add_subscriber
 from src.email.generator import generate_digest_html
+from src.core.quality_control import QualityGates, run_quality_pipeline
 
 def main():
     parser = argparse.ArgumentParser(description="Research Newsletter Pipeline")
@@ -52,13 +53,15 @@ def main():
     client = OpenAlexClient()
     classifier = TopicClassifier()
     classifier.load_categories()
-
+    qc = QualityGates(config_path="src/core/qc_config.json")
+    
+    qc_summary = {"total_filtered": 0, "rejections": {}}
     results = {}
-
+    
     for topic in topic_list:
         if args.debug:
             print(f"\n--- Topic: {topic} ---")
-
+        
         # Get keywords
         keywords = " OR ".join(classifier.categories.get(topic, [topic]))
         
@@ -67,25 +70,45 @@ def main():
         except Exception as e:
             print(f"Error fetching {topic}: {e}")
             continue
-
+        
         # Score and filter
         scored = []
         for paper in raw_papers:
             score = classifier.score_paper(paper, [topic])
             if score > 0.05:  # Minimum relevance threshold
                 scored.append((score, paper))
-
+        
         scored.sort(key=lambda x: x[0], reverse=True)
-        top_papers = [p for _, p in scored[:args.limit]]
-
+        top_candidates = [p for _, p in scored[:args.limit * 2]]
+        
+        # Run quality control gates
+        qc_passed = []
+        for paper in top_candidates:
+            passed, gate_results = qc.check(paper)
+            if passed:
+                qc_passed.append(paper)
+            else:
+                qc_summary["total_filtered"] += 1
+                for gate, result in gate_results.items():
+                    if not result["passed"]:
+                        reason = result["reason"]
+                        if reason not in qc_summary["rejections"]:
+                            qc_summary["rejections"][reason] = 0
+                        qc_summary["rejections"][reason] += 1
+        
+        # Take top N after QC
+        top_papers = qc_passed[:args.limit]
+        
         results[topic] = {
             "papers": top_papers,
             "count": len(top_papers),
+            "qc_passed": len(qc_passed),
             "subscribers": [s['email'] for s in subs if topic in s['topics']]
         }
-
+        
         if args.debug:
-            print(f"  Found {len(raw_papers)} papers, {len(scored)} scored > 0.05, top {len(top_papers)}")
+            print(f"  Found {len(raw_papers)} papers, {len(scored)} scored > 0.05")
+            print(f"  QC passed: {len(qc_passed)}, final: {len(top_papers)}")
             for p in top_papers[:3]:
                 print(f"    - {p.get('title', 'N/A')[:80]}")
 

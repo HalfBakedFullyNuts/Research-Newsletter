@@ -1,0 +1,10 @@
+{
+  "min_citations": 0,
+  "max_age_days": 365,
+  "open_access": false,
+  "journal_impact": false,
+  "retraction_check": true,
+  "predatory_journal": true,
+  "language_check": true,
+  "duplicate_check": true
+}
